@@ -49,7 +49,7 @@ class WorkflowTaskImpl(private val workflowFactory: (WorkflowName) -> Workflow) 
     override fun getDurationBeforeRetry(e: Exception): Duration? = null
 
     override fun handle(workflowTaskParameters: WorkflowTaskParameters): WorkflowTaskReturnValue {
-        // get  instance workflow by name
+        // get instance workflow by name
         val workflow = workflowFactory(workflowTaskParameters.workflowName)
 
         // get method
@@ -106,7 +106,7 @@ class WorkflowTaskImpl(private val workflowFactory: (WorkflowName) -> Workflow) 
                         workflowName = workflowTaskParameters.workflowName.toString(),
                         workflowId = workflowTaskParameters.workflowId.toString(),
                         workflowTaskId = context.id,
-                        workerException = WorkerException.from(ClientName(context.client.name), throwable)
+                        workerException = WorkerException.from(ClientName(client.name), throwable)
                     )
                 }
             }

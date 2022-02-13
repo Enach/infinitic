@@ -25,12 +25,10 @@
 
 dependencies {
     implementation(kotlin("reflect"))
-    implementation(Libs.Coroutines.core)
-    implementation(Libs.JsonPath.jayway)
 
-    implementation(project(":infinitic-common"))
     implementation(project(":infinitic-client"))
     implementation(project(":infinitic-task-executor"))
+    implementation(project(":infinitic-common"))
 }
 
 apply("../publish.gradle.kts")

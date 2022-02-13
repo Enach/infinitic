@@ -83,8 +83,7 @@ class TaskExecutor(
             lastError = message.lastError,
             tags = message.taskTags.map { it.tag }.toSet(),
             meta = message.taskMeta.map.toMutableMap(),
-            options = message.taskOptions,
-            clientFactory
+            options = message.taskOptions
         )
 
         // trying to instantiate the task
@@ -100,6 +99,8 @@ class TaskExecutor(
 
         // set taskContext into task
         task.context = taskContext
+        // set client into task
+        task.client = clientFactory()
 
         try {
             val output = if (options.maxRunDuration != null && options.maxRunDuration!!.toMillis() > 0) {

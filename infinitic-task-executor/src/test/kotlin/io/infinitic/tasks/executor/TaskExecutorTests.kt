@@ -76,7 +76,7 @@ fun mockSendToTaskEngine(slots: MutableList<TaskEngineMessage>): SendToTaskEngin
 
 class TaskExecutorTests : StringSpec({
     val slots = mutableListOf<TaskEngineMessage>()
-    val mockClientFactory = mockk<()-> InfiniticClient>()
+    val mockClientFactory = { mockk<InfiniticClient>() }
     val taskFactory = { taskName: TaskName ->
         when (taskName.toString()) {
             "testingSampleTask" -> TestingSampleTask()

@@ -61,8 +61,8 @@ class TaskAImpl : Task(), TaskA {
 
     override fun cancelWorkflowA(id: String) {
         Thread.sleep(50)
-        val t = context.client.getWorkflowById(WorkflowA::class.java, id)
-        context.client.cancel(t)
+        val t = client.getWorkflowById(WorkflowA::class.java, id)
+        client.cancel(t)
     }
 
     override fun failing() = throw Exception("sorry")

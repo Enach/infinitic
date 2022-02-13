@@ -25,12 +25,14 @@
 
 package io.infinitic.tasks
 
+import io.infinitic.client.InfiniticClient
 import java.time.Duration
 import kotlin.math.pow
 
 @Suppress("unused")
 abstract class Task {
     lateinit var context: TaskContext
+    lateinit var client: InfiniticClient
 
     // Exponential backoff retry strategy up to 12 attempts
     open fun getDurationBeforeRetry(e: Exception): Duration? {

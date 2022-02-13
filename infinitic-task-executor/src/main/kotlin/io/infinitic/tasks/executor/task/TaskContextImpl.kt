@@ -25,7 +25,6 @@
 
 package io.infinitic.tasks.executor.task
 
-import io.infinitic.client.InfiniticClient
 import io.infinitic.common.errors.WorkerError
 import io.infinitic.tasks.TaskContext
 import io.infinitic.tasks.TaskOptions
@@ -42,7 +41,4 @@ data class TaskContextImpl(
     override val tags: Set<String>,
     override val meta: MutableMap<String, ByteArray>,
     override val options: TaskOptions,
-    private val clientFactory: () -> InfiniticClient
-) : TaskContext {
-    override val client: InfiniticClient by lazy { clientFactory() }
-}
+) : TaskContext

@@ -25,11 +25,9 @@
 
 package io.infinitic.tasks
 
-import io.infinitic.client.InfiniticClient
 import io.infinitic.common.errors.WorkerError
 
 interface TaskContext {
-    val client: InfiniticClient
     val id: String
     val name: String
     val workflowId: String?
