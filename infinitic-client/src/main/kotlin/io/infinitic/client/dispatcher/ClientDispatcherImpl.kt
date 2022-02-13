@@ -30,6 +30,7 @@ import io.infinitic.client.deferred.DeferredChannel
 import io.infinitic.client.deferred.DeferredMethod
 import io.infinitic.client.deferred.DeferredSend
 import io.infinitic.client.deferred.DeferredWorkflow
+import io.infinitic.common.clients.data.ClientName
 import io.infinitic.common.clients.messages.ClientMessage
 import io.infinitic.common.clients.messages.MethodCanceled
 import io.infinitic.common.clients.messages.MethodCompleted
@@ -37,7 +38,6 @@ import io.infinitic.common.clients.messages.MethodFailed
 import io.infinitic.common.clients.messages.MethodRunUnknown
 import io.infinitic.common.clients.messages.WorkflowIdsByTag
 import io.infinitic.common.clients.messages.interfaces.MethodMessage
-import io.infinitic.common.data.ClientName
 import io.infinitic.common.data.methods.MethodName
 import io.infinitic.common.errors.FailedWorkflowError
 import io.infinitic.common.exceptions.thisShouldNotHappen

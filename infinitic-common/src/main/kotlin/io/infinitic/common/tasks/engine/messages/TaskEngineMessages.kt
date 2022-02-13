@@ -25,7 +25,7 @@
 
 package io.infinitic.common.tasks.engine.messages
 
-import io.infinitic.common.data.ClientName
+import io.infinitic.common.clients.data.ClientName
 import io.infinitic.common.data.MessageId
 import io.infinitic.common.data.MillisDuration
 import io.infinitic.common.data.ReturnValue
@@ -44,6 +44,7 @@ import io.infinitic.common.tasks.data.TaskRetrySequence
 import io.infinitic.common.tasks.data.TaskTag
 import io.infinitic.common.tasks.engine.messages.interfaces.FailingTaskAttemptMessage
 import io.infinitic.common.tasks.engine.messages.interfaces.TaskAttemptMessage
+import io.infinitic.common.workers.data.WorkerName
 import io.infinitic.common.workflows.data.methodRuns.MethodRunId
 import io.infinitic.common.workflows.data.workflows.WorkflowId
 import io.infinitic.common.workflows.data.workflows.WorkflowName
@@ -53,7 +54,6 @@ import kotlinx.serialization.Serializable
 @Serializable
 sealed class TaskEngineMessage : Message {
     val messageId = MessageId()
-    abstract val emitterName: ClientName
     abstract val taskId: TaskId
     abstract val taskName: TaskName
 
@@ -74,28 +74,28 @@ data class DispatchTask(
     val methodRunId: MethodRunId?,
     val taskTags: Set<TaskTag>,
     val taskMeta: TaskMeta,
-    override val emitterName: ClientName
+    val emitterName: ClientName
 ) : TaskEngineMessage()
 
 @Serializable
 data class WaitTask(
     override val taskName: TaskName,
     override val taskId: TaskId,
-    override val emitterName: ClientName,
+    val emitterName: ClientName,
 ) : TaskEngineMessage()
 
 @Serializable
 data class RetryTask(
     override val taskName: TaskName,
     override val taskId: TaskId,
-    override val emitterName: ClientName
+    val emitterName: ClientName
 ) : TaskEngineMessage()
 
 @Serializable
 data class CancelTask(
     override val taskName: TaskName,
     override val taskId: TaskId,
-    override val emitterName: ClientName
+    val emitterName: ClientName
 ) : TaskEngineMessage()
 
 @Serializable
@@ -103,7 +103,7 @@ data class CompleteTask(
     override val taskName: TaskName,
     override val taskId: TaskId,
     val taskReturnValue: ReturnValue,
-    override val emitterName: ClientName
+    val emitterName: ClientName
 ) : TaskEngineMessage()
 
 @Serializable
@@ -113,7 +113,7 @@ data class RetryTaskAttempt(
     override val taskRetryIndex: TaskRetryIndex,
     override val taskAttemptId: TaskAttemptId,
     override val taskRetrySequence: TaskRetrySequence,
-    override val emitterName: ClientName
+    val emitterName: ClientName
 ) : TaskEngineMessage(), TaskAttemptMessage
 
 @Serializable
@@ -125,7 +125,7 @@ data class TaskAttemptCompleted(
     override val taskRetrySequence: TaskRetrySequence,
     val taskReturnValue: ReturnValue,
     val taskMeta: TaskMeta,
-    override val emitterName: ClientName
+    val emitterName: WorkerName
 ) : TaskEngineMessage(), TaskAttemptMessage
 
 @Serializable
@@ -139,5 +139,5 @@ data class TaskAttemptFailed(
     val deferredError: DeferredError?,
     val workerError: WorkerError?,
     val taskMeta: TaskMeta,
-    override val emitterName: ClientName
+    val emitterName: WorkerName
 ) : TaskEngineMessage(), FailingTaskAttemptMessage

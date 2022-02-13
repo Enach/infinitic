@@ -26,11 +26,11 @@
 package io.infinitic.tasks.executor.worker
 
 import io.infinitic.client.InfiniticClient
-import io.infinitic.common.data.ClientName
 import io.infinitic.common.tasks.data.TaskName
 import io.infinitic.common.tasks.engine.SendToTaskEngine
 import io.infinitic.common.tasks.executors.messages.TaskExecutorMessage
 import io.infinitic.common.workers.MessageToProcess
+import io.infinitic.common.workers.data.WorkerName
 import io.infinitic.tasks.Task
 import io.infinitic.tasks.executor.TaskExecutor
 import kotlinx.coroutines.CoroutineName
@@ -57,7 +57,7 @@ fun <T : TaskExecutorMessageToProcess> CoroutineScope.startTaskExecutor(
     clientFactory: () -> InfiniticClient
 ) = launch(CoroutineName(name)) {
 
-    val taskExecutor = TaskExecutor(ClientName(name), sendToTaskEngine, taskFactory, clientFactory)
+    val taskExecutor = TaskExecutor(WorkerName(name), sendToTaskEngine, taskFactory, clientFactory)
 
     for (message in inputChannel) {
         try {

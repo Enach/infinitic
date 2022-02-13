@@ -27,7 +27,8 @@ package io.infinitic.inMemory
 
 import io.infinitic.client.InfiniticClient
 import io.infinitic.client.worker.startClientWorker
-import io.infinitic.common.data.ClientName
+import io.infinitic.common.clients.data.ClientName
+import io.infinitic.common.workers.data.WorkerName
 import io.infinitic.inMemory.transport.InMemoryOutput
 import io.infinitic.worker.config.WorkerConfig
 import kotlinx.coroutines.CoroutineName
@@ -45,7 +46,7 @@ class InMemoryInfiniticClient(
         InMemoryInfiniticWorker(workerConfig).apply {
             output = inMemoryOutput
             client = this@InMemoryInfiniticClient
-            this.workerName = clientName.toString()
+            workerName = WorkerName(clientName.toString())
         }
     }
 

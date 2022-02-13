@@ -28,6 +28,7 @@ package io.infinitic.inMemory
 import io.infinitic.common.data.Name
 import io.infinitic.common.exceptions.thisShouldNotHappen
 import io.infinitic.common.tasks.data.TaskName
+import io.infinitic.common.workers.data.WorkerName
 import io.infinitic.common.workflows.data.workflowTasks.isWorkflowTask
 import io.infinitic.common.workflows.data.workflows.WorkflowName
 import io.infinitic.inMemory.transport.InMemoryOutput
@@ -63,7 +64,7 @@ class InMemoryInfiniticWorker(
 
     lateinit var output: InMemoryOutput
     lateinit var client: InMemoryInfiniticClient
-    override lateinit var workerName: String
+    override lateinit var workerName: WorkerName
 
     override fun startAsync(): CompletableFuture<Unit> =
         if (this::output.isInitialized && this::client.isInitialized && this::workerName.isInitialized) {

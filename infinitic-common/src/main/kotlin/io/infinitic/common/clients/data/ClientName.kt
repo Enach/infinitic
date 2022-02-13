@@ -23,16 +23,11 @@
  * Licensor: infinitic.io
  */
 
-package io.infinitic.common.data
+package io.infinitic.common.clients.data
 
 import kotlinx.serialization.Serializable
-import java.lang.reflect.Method
 
 @JvmInline @Serializable
 value class ClientName(private val name: String) {
-    companion object {
-        fun from(method: Method) = ClientName(method.declaringClass.name)
-    }
-
     override fun toString() = name
 }

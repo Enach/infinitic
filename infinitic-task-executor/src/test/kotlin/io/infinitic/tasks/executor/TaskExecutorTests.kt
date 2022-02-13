@@ -28,7 +28,7 @@
 package io.infinitic.tasks.executor
 
 import io.infinitic.client.InfiniticClient
-import io.infinitic.common.data.ClientName
+import io.infinitic.common.clients.data.ClientName
 import io.infinitic.common.data.MillisDuration
 import io.infinitic.common.data.ReturnValue
 import io.infinitic.common.data.methods.MethodName
@@ -45,6 +45,7 @@ import io.infinitic.common.tasks.engine.messages.TaskAttemptCompleted
 import io.infinitic.common.tasks.engine.messages.TaskAttemptFailed
 import io.infinitic.common.tasks.engine.messages.TaskEngineMessage
 import io.infinitic.common.tasks.executors.messages.ExecuteTaskAttempt
+import io.infinitic.common.workers.data.WorkerName
 import io.infinitic.exceptions.tasks.MaxRunDurationException
 import io.infinitic.exceptions.tasks.NoMethodFoundWithParameterCountException
 import io.infinitic.exceptions.tasks.NoMethodFoundWithParameterTypesException
@@ -66,6 +67,7 @@ import kotlinx.coroutines.coroutineScope
 import java.time.Duration
 
 private val clientName = ClientName("clientTaskExecutorTests")
+private val workerName = WorkerName("workerTaskExecutorTests")
 
 fun mockSendToTaskEngine(slots: MutableList<TaskEngineMessage>): SendToTaskEngine {
     val sendToTaskEngine = mockk<SendToTaskEngine>()
@@ -88,7 +90,7 @@ class TaskExecutorTests : StringSpec({
         }
     }
     val taskExecutor =
-        TaskExecutor(clientName, mockSendToTaskEngine(slots), taskFactory, mockClientFactory)
+        TaskExecutor(workerName, mockSendToTaskEngine(slots), taskFactory, mockClientFactory)
 
     // ensure slots are emptied between each test
     beforeTest {
@@ -112,7 +114,7 @@ class TaskExecutorTests : StringSpec({
             taskRetryIndex = msg.taskRetryIndex,
             taskReturnValue = ReturnValue.from("9"),
             taskMeta = msg.taskMeta,
-            emitterName = clientName
+            emitterName = workerName
         )
     }
 
@@ -132,7 +134,7 @@ class TaskExecutorTests : StringSpec({
             taskRetryIndex = msg.taskRetryIndex,
             taskReturnValue = ReturnValue.from("12"),
             taskMeta = msg.taskMeta,
-            emitterName = clientName
+            emitterName = workerName
         )
     }
 
@@ -262,7 +264,7 @@ class TaskExecutorTests : StringSpec({
             taskRetryIndex = msg.taskRetryIndex,
             taskReturnValue = ReturnValue.from("72"),
             taskMeta = msg.taskMeta,
-            emitterName = clientName
+            emitterName = workerName
         )
     }
 

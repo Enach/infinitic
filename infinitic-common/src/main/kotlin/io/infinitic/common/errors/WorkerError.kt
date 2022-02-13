@@ -25,7 +25,7 @@
 
 package io.infinitic.common.errors
 
-import io.infinitic.common.data.ClientName
+import io.infinitic.common.workers.data.WorkerName
 import io.infinitic.exceptions.WorkerException
 import kotlinx.serialization.Serializable
 
@@ -37,7 +37,7 @@ data class WorkerError(
     /**
      * Name of the worker
      */
-    val workerName: ClientName,
+    val workerName: WorkerName,
 
     /**
      * Name of the error
@@ -61,14 +61,14 @@ data class WorkerError(
 ) {
     companion object {
         fun from(exception: WorkerException): WorkerError = WorkerError(
-            workerName = ClientName(exception.workerName),
+            workerName = WorkerName(exception.workerName),
             name = exception.name,
             message = exception.message,
             stackTraceToString = exception.stackTraceToString,
             cause = exception.cause?.let { from(it) }
         )
 
-        fun from(workerName: ClientName, throwable: Throwable): WorkerError = WorkerError(
+        fun from(workerName: WorkerName, throwable: Throwable): WorkerError = WorkerError(
             workerName = workerName,
             name = throwable::class.java.name,
             message = throwable.message,

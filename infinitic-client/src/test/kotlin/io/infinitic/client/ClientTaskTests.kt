@@ -25,7 +25,7 @@
 
 package io.infinitic.client
 
-import io.infinitic.common.data.ClientName
+import io.infinitic.common.clients.data.ClientName
 import io.infinitic.common.tasks.engine.messages.TaskEngineMessage
 import io.infinitic.common.tasks.tags.messages.TaskTagEngineMessage
 import io.infinitic.common.workflows.engine.messages.WorkflowEngineMessage

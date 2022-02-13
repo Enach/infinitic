@@ -29,6 +29,7 @@ import io.infinitic.common.data.Name
 import io.infinitic.common.storage.keySet.CachedKeySetStorage
 import io.infinitic.common.storage.keyValue.CachedKeyValueStorage
 import io.infinitic.common.tasks.data.TaskName
+import io.infinitic.common.workers.data.WorkerName
 import io.infinitic.common.workflows.data.workflowTasks.WorkflowTask
 import io.infinitic.common.workflows.data.workflows.WorkflowName
 import io.infinitic.metrics.global.engine.storage.BinaryMetricsGlobalStateStorage
@@ -75,7 +76,7 @@ abstract class InfiniticWorker(open val workerConfig: WorkerConfig) : Closeable 
     protected val perNameStorages = mutableMapOf<TaskName, MetricsPerNameStateStorage>()
     protected val globalStorages = mutableMapOf<TaskName, MetricsGlobalStateStorage>()
 
-    abstract val workerName: String
+    abstract val workerName: WorkerName
 
     protected abstract fun startTaskExecutors(name: Name, concurrency: Int)
 

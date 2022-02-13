@@ -25,9 +25,9 @@
 
 package io.infinitic.tasks.engine
 
+import io.infinitic.common.clients.data.ClientName
 import io.infinitic.common.clients.messages.TaskUnknown
 import io.infinitic.common.clients.transport.SendToClient
-import io.infinitic.common.data.ClientName
 import io.infinitic.common.errors.CanceledTaskError
 import io.infinitic.common.errors.FailedTaskError
 import io.infinitic.common.errors.WorkerError
@@ -56,6 +56,7 @@ import io.infinitic.common.tasks.executors.SendToTaskExecutors
 import io.infinitic.common.tasks.executors.messages.ExecuteTaskAttempt
 import io.infinitic.common.tasks.tags.SendToTaskTagEngine
 import io.infinitic.common.tasks.tags.messages.RemoveTagFromTask
+import io.infinitic.common.workers.data.WorkerName
 import io.infinitic.common.workflows.engine.SendToWorkflowEngine
 import io.infinitic.common.workflows.engine.messages.TaskFailed
 import io.infinitic.tasks.engine.storage.LoggedTaskStateStorage
@@ -435,7 +436,7 @@ class TaskEngine(
                             taskName = msg.taskName,
                             taskId = msg.taskId,
                             methodName = state.methodName,
-                            cause = msg.workerError ?: WorkerError.from(ClientName("unsused"), Exception("unused"))
+                            cause = msg.workerError ?: WorkerError.from(WorkerName("unsused"), Exception("unused"))
                         ),
                         deferredError = msg.deferredError
                     )

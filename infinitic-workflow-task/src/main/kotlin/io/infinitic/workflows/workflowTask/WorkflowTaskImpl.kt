@@ -25,7 +25,7 @@
 
 package io.infinitic.workflows.workflowTask
 
-import io.infinitic.common.data.ClientName
+import io.infinitic.common.clients.data.ClientName
 import io.infinitic.common.data.ReturnValue
 import io.infinitic.common.parser.getMethodPerNameAndParameters
 import io.infinitic.common.workflows.data.properties.PropertyHash

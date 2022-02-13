@@ -27,6 +27,7 @@ package io.infinitic.pulsar
 
 import io.infinitic.common.data.Name
 import io.infinitic.common.tasks.data.TaskName
+import io.infinitic.common.workers.data.WorkerName
 import io.infinitic.common.workflows.data.workflows.WorkflowName
 import io.infinitic.metrics.global.engine.storage.MetricsGlobalStateStorage
 import io.infinitic.metrics.perName.engine.storage.MetricsPerNameStateStorage
@@ -108,7 +109,7 @@ class PulsarInfiniticWorker private constructor(
     private val fullNamespace = "${pulsar.tenant}/${pulsar.namespace}"
 
     override val workerName by lazy {
-        getProducerName(pulsarClient, pulsar.tenant, pulsar.namespace, workerConfig.name)
+        WorkerName(getProducerName(pulsarClient, pulsar.tenant, pulsar.namespace, workerConfig.name))
     }
 
     private val pulsarConsumerFactory by lazy {
@@ -116,7 +117,7 @@ class PulsarInfiniticWorker private constructor(
     }
 
     private val pulsarOutput by lazy {
-        PulsarOutput.from(pulsarClient, pulsar.tenant, pulsar.namespace, workerName)
+        PulsarOutput.from(pulsarClient, pulsar.tenant, pulsar.namespace, workerName.toString())
     }
 
     private val clientFactory = { PulsarInfiniticClient(pulsarClient, pulsarAdmin, pulsar.tenant, pulsar.namespace) }
@@ -267,7 +268,7 @@ class PulsarInfiniticWorker private constructor(
             startPulsarTaskExecutors(
                 name,
                 concurrency,
-                this@PulsarInfiniticWorker.workerName,
+                this@PulsarInfiniticWorker.workerName.toString(),
                 pulsarConsumerFactory,
                 pulsarOutput,
                 register.getTaskFactory(),
@@ -283,7 +284,7 @@ class PulsarInfiniticWorker private constructor(
     ) {
         runningScope.launch {
             startPulsarWorkflowTagEngines(
-                workerName,
+                workerName.toString(),
                 concurrency,
                 storage,
                 workflowName,
@@ -300,7 +301,7 @@ class PulsarInfiniticWorker private constructor(
     ) {
         runningScope.launch {
             startPulsarTaskEngines(
-                workerName,
+                workerName.toString(),
                 concurrency,
                 storage,
                 workflowName,
@@ -313,7 +314,7 @@ class PulsarInfiniticWorker private constructor(
     override fun startTaskEngines(taskName: TaskName, concurrency: Int, storage: TaskStateStorage) {
         runningScope.launch {
             startPulsarTaskEngines(
-                workerName,
+                workerName.toString(),
                 concurrency,
                 storage,
                 taskName,
@@ -326,7 +327,7 @@ class PulsarInfiniticWorker private constructor(
     override fun startTaskDelayEngines(workflowName: WorkflowName, concurrency: Int) {
         runningScope.launch {
             startPulsarTaskDelayEngines(
-                workerName,
+                workerName.toString(),
                 concurrency,
                 workflowName,
                 pulsarConsumerFactory,
@@ -338,7 +339,7 @@ class PulsarInfiniticWorker private constructor(
     override fun startTaskDelayEngines(taskName: TaskName, concurrency: Int) {
         runningScope.launch {
             startPulsarTaskDelayEngines(
-                workerName,
+                workerName.toString(),
                 concurrency,
                 taskName,
                 pulsarConsumerFactory,
@@ -354,7 +355,7 @@ class PulsarInfiniticWorker private constructor(
     ) {
         runningScope.launch {
             startPulsarWorkflowEngines(
-                workerName,
+                workerName.toString(),
                 concurrency,
                 storage,
                 workflowName,
@@ -367,7 +368,7 @@ class PulsarInfiniticWorker private constructor(
     override fun startWorkflowDelayEngines(workflowName: WorkflowName, concurrency: Int) {
         runningScope.launch {
             startPulsarWorkflowDelayEngines(
-                workerName,
+                workerName.toString(),
                 concurrency,
                 workflowName,
                 pulsarConsumerFactory,
@@ -379,7 +380,7 @@ class PulsarInfiniticWorker private constructor(
     override fun startTaskTagEngines(taskName: TaskName, concurrency: Int, storage: TaskTagStorage) {
         runningScope.launch {
             startPulsarTaskTagEngines(
-                workerName,
+                workerName.toString(),
                 concurrency,
                 storage,
                 taskName,
@@ -392,7 +393,7 @@ class PulsarInfiniticWorker private constructor(
     override fun startMetricsPerNameEngines(taskName: TaskName, storage: MetricsPerNameStateStorage) {
         runningScope.launch {
             startPulsarMetricsPerNameEngines(
-                workerName,
+                workerName.toString(),
                 storage,
                 taskName,
                 pulsarConsumerFactory,
@@ -404,7 +405,7 @@ class PulsarInfiniticWorker private constructor(
     override fun startMetricsGlobalEngine(storage: MetricsGlobalStateStorage) {
         runningScope.launch {
             startPulsarMetricsGlobalEngine(
-                workerName,
+                workerName.toString(),
                 storage,
                 pulsarConsumerFactory
             )

@@ -26,7 +26,6 @@
 package io.infinitic.tasks.executor
 
 import io.infinitic.client.InfiniticClient
-import io.infinitic.common.data.ClientName
 import io.infinitic.common.data.MillisDuration
 import io.infinitic.common.data.ReturnValue
 import io.infinitic.common.data.methods.MethodParameters
@@ -40,6 +39,7 @@ import io.infinitic.common.tasks.engine.messages.TaskAttemptCompleted
 import io.infinitic.common.tasks.engine.messages.TaskAttemptFailed
 import io.infinitic.common.tasks.executors.messages.ExecuteTaskAttempt
 import io.infinitic.common.tasks.executors.messages.TaskExecutorMessage
+import io.infinitic.common.workers.data.WorkerName
 import io.infinitic.exceptions.DeferredException
 import io.infinitic.exceptions.tasks.MaxRunDurationException
 import io.infinitic.tasks.Task
@@ -56,7 +56,7 @@ import java.lang.reflect.InvocationTargetException
 import java.lang.reflect.Method
 
 class TaskExecutor(
-    private val clientName: ClientName,
+    private val workerName: WorkerName,
     private val sendToTaskEngine: SendToTaskEngine,
     private val taskFactory: (TaskName) -> Task,
     private val clientFactory: () -> InfiniticClient
@@ -208,10 +208,10 @@ class TaskExecutor(
             },
             workerError = when (throwable is DeferredException) {
                 true -> null
-                false -> WorkerError.from(clientName, throwable)
+                false -> WorkerError.from(workerName, throwable)
             },
             taskMeta = taskMeta,
-            emitterName = clientName
+            emitterName = workerName
         )
 
         sendToTaskEngine(taskAttemptFailed)
@@ -230,7 +230,7 @@ class TaskExecutor(
             taskRetrySequence = message.taskRetrySequence,
             taskReturnValue = ReturnValue.from(returnValue),
             taskMeta = taskMeta,
-            emitterName = clientName
+            emitterName = workerName
         )
 
         sendToTaskEngine(taskAttemptCompleted)

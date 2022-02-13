@@ -23,30 +23,22 @@
  * Licensor: infinitic.io
  */
 
-package io.infinitic.common.metrics.perName.messages
+package io.infinitic.common.workers.data
 
-import io.infinitic.common.clients.data.ClientName
-import io.infinitic.common.data.MessageId
-import io.infinitic.common.messages.Message
-import io.infinitic.common.tasks.data.TaskId
-import io.infinitic.common.tasks.data.TaskName
-import io.infinitic.common.tasks.data.TaskStatus
+import io.infinitic.common.data.Name
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
 
-@Serializable
-sealed class MetricsPerNameMessage : Message {
-    val messageId = MessageId()
-    abstract val emitterName: ClientName
-    abstract val taskName: TaskName
+@Serializable(with = WorkerNameSerializer::class)
+data class WorkerName(override val name: String) : Name(name)
 
-    override fun envelope() = MetricsPerNameEnvelope.from(this)
+object WorkerNameSerializer : KSerializer<WorkerName> {
+    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("WorkerName", PrimitiveKind.STRING)
+    override fun serialize(encoder: Encoder, value: WorkerName) { encoder.encodeString(value.name) }
+    override fun deserialize(decoder: Decoder) = WorkerName(decoder.decodeString())
 }
-
-@Serializable
-data class TaskStatusUpdated(
-    override val taskName: TaskName,
-    val taskId: TaskId,
-    val oldStatus: TaskStatus?,
-    val newStatus: TaskStatus,
-    override val emitterName: ClientName
-) : MetricsPerNameMessage()
