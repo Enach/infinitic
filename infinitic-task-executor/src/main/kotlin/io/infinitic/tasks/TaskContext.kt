@@ -32,6 +32,7 @@ interface TaskContext {
     val register: TaskExecutorRegister
     val client: InfiniticClient
     val id: String
+    val name: String
     val workflowId: String?
     val workflowName: String?
     val attemptId: String

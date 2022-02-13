@@ -63,9 +63,3 @@ interface TaskExecutorRegister {
      */
     fun getWorkflowInstance(name: String): Workflow
 }
-
-inline fun <reified T> TaskExecutorRegister.registerTask(noinline factory: TaskFactory) =
-    this.registerTask(T::class.java.name, factory)
-
-inline fun <reified T> TaskExecutorRegister.registerWorkflow(noinline factory: WorkflowFactory) =
-    this.registerWorkflow(T::class.java.name, factory)

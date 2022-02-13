@@ -76,6 +76,7 @@ class TaskExecutor(
         val taskContext = TaskContextImpl(
             register = this,
             id = message.taskId.toString(),
+            name = message.taskName.toString(),
             workflowId = message.workflowId?.toString(),
             workflowName = message.workflowName?.name,
             attemptId = message.taskAttemptId.toString(),
