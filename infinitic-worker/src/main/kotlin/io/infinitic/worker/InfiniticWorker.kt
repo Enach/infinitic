@@ -41,7 +41,6 @@ import io.infinitic.tags.workflows.storage.BinaryWorkflowTagStorage
 import io.infinitic.tags.workflows.storage.WorkflowTagStorage
 import io.infinitic.tasks.engine.storage.BinaryTaskStateStorage
 import io.infinitic.tasks.engine.storage.TaskStateStorage
-import io.infinitic.tasks.executor.register.TaskExecutorRegisterImpl
 import io.infinitic.worker.config.WorkerConfig
 import io.infinitic.workflows.engine.storage.BinaryWorkflowStateStorage
 import io.infinitic.workflows.engine.storage.WorkflowStateStorage
@@ -63,9 +62,10 @@ abstract class InfiniticWorker(open val workerConfig: WorkerConfig) : Closeable 
     protected val logger = KotlinLogging.logger {}
 
     private val runningThreadPool = Executors.newCachedThreadPool()
+
     val runningScope = CoroutineScope(runningThreadPool.asCoroutineDispatcher() + Job())
 
-    protected val taskExecutorRegister = TaskExecutorRegisterImpl()
+    protected val register = InfiniticWorkerRegister()
 
     protected val taskStorages = mutableMapOf<TaskName, TaskStateStorage>()
     protected val taskTagStorages = mutableMapOf<TaskName, TaskTagStorage>()
@@ -75,7 +75,7 @@ abstract class InfiniticWorker(open val workerConfig: WorkerConfig) : Closeable 
     protected val perNameStorages = mutableMapOf<TaskName, MetricsPerNameStateStorage>()
     protected val globalStorages = mutableMapOf<TaskName, MetricsGlobalStateStorage>()
 
-    abstract val name: String
+    abstract val workerName: String
 
     protected abstract fun startTaskExecutors(name: Name, concurrency: Int)
 
@@ -122,9 +122,10 @@ abstract class InfiniticWorker(open val workerConfig: WorkerConfig) : Closeable 
      * Start worker asynchronously
      */
     open fun startAsync(): CompletableFuture<Unit> {
-        // register WorkflowTasks
-        taskExecutorRegister.registerTask(WorkflowTask::class.java.name) { WorkflowTaskImpl() }
+        // register WorkflowTask
+        register.registerTask(WorkflowTask::class.java.name) { WorkflowTaskImpl(register.getWorkflowFactory()) }
 
+        // register workflows
         for (workflow in workerConfig.workflows) {
             val workflowName = WorkflowName(workflow.name)
             logger.info { "Workflow $workflowName:" }
@@ -135,7 +136,7 @@ abstract class InfiniticWorker(open val workerConfig: WorkerConfig) : Closeable 
                     "- workflow executor".padEnd(25) +
                         ": (instances: ${workflow.concurrency}) ${workflow.instance::class.java.name}"
                 }
-                taskExecutorRegister.registerWorkflow(workflow.name) { workflow.instance }
+                register.registerWorkflow(workflow.name) { workflow.instance }
 
                 startTaskExecutors(workflowName, workflow.concurrency)
             }
@@ -217,7 +218,7 @@ abstract class InfiniticWorker(open val workerConfig: WorkerConfig) : Closeable 
                     "- task executor".padEnd(25) +
                         ": (instances: ${task.concurrency}) ${task.instance::class.java.name}"
                 }
-                taskExecutorRegister.registerTask(task.name) { task.instance }
+                register.registerTask(task.name) { task.instance }
 
                 startTaskExecutors(taskName, task.concurrency)
             }
@@ -295,7 +296,7 @@ abstract class InfiniticWorker(open val workerConfig: WorkerConfig) : Closeable 
                 startMetricsGlobalEngine(globalStorage)
             }
         }
-        logger.info { "Worker \"$name\" ready" }
+        logger.info { "Worker \"$workerName\" ready" }
 
         // provides a CompletableFuture that waits for completion of all launched coroutines
         return runningScope.future { coroutineContext.job.join() }

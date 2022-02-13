@@ -34,6 +34,7 @@ import io.infinitic.common.errors.DeferredError
 import io.infinitic.common.errors.WorkerError
 import io.infinitic.common.parser.getMethodPerNameAndParameters
 import io.infinitic.common.tasks.data.TaskMeta
+import io.infinitic.common.tasks.data.TaskName
 import io.infinitic.common.tasks.engine.SendToTaskEngine
 import io.infinitic.common.tasks.engine.messages.TaskAttemptCompleted
 import io.infinitic.common.tasks.engine.messages.TaskAttemptFailed
@@ -42,7 +43,6 @@ import io.infinitic.common.tasks.executors.messages.TaskExecutorMessage
 import io.infinitic.exceptions.DeferredException
 import io.infinitic.exceptions.tasks.MaxRunDurationException
 import io.infinitic.tasks.Task
-import io.infinitic.tasks.TaskExecutorRegister
 import io.infinitic.tasks.executor.task.DurationBeforeRetryFailed
 import io.infinitic.tasks.executor.task.DurationBeforeRetryRetrieved
 import io.infinitic.tasks.executor.task.TaskCommand
@@ -57,11 +57,10 @@ import java.lang.reflect.Method
 
 class TaskExecutor(
     private val clientName: ClientName,
-    private val taskExecutorRegister: TaskExecutorRegister,
     private val sendToTaskEngine: SendToTaskEngine,
+    private val taskFactory: (TaskName) -> Task,
     private val clientFactory: () -> InfiniticClient
-) : TaskExecutorRegister by taskExecutorRegister {
-
+) {
     private val logger = KotlinLogging.logger {}
 
     suspend fun handle(message: TaskExecutorMessage) {
@@ -74,7 +73,6 @@ class TaskExecutor(
 
     private suspend fun executeTaskAttempt(message: ExecuteTaskAttempt) {
         val taskContext = TaskContextImpl(
-            register = this,
             id = message.taskId.toString(),
             name = message.taskName.toString(),
             workflowId = message.workflowId?.toString(),
@@ -165,7 +163,7 @@ class TaskExecutor(
     }
 
     private fun parse(msg: ExecuteTaskAttempt): TaskCommand {
-        val task = getTaskInstance("${msg.taskName}")
+        val task = taskFactory(msg.taskName)
 
         val parameterTypes = msg.methodParameterTypes
 

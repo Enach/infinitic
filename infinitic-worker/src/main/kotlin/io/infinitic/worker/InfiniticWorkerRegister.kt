@@ -23,40 +23,46 @@
  * Licensor: infinitic.io
  */
 
-package io.infinitic.tasks.executor.register
+package io.infinitic.worker
 
-import io.infinitic.exceptions.tasks.ClassNotFoundException
+import io.infinitic.common.tasks.data.TaskName
+import io.infinitic.common.workflows.data.workflows.WorkflowName
+import io.infinitic.exceptions.tasks.TaskNotFoundException
+import io.infinitic.exceptions.workflows.WorkflowNotFoundException
 import io.infinitic.tasks.Task
-import io.infinitic.tasks.TaskExecutorRegister
-import io.infinitic.tasks.TaskFactory
-import io.infinitic.tasks.WorkflowFactory
 import io.infinitic.workflows.Workflow
+import org.jetbrains.annotations.TestOnly
 
-class TaskExecutorRegisterImpl : TaskExecutorRegister {
+class InfiniticWorkerRegister {
     // map task name <> task factory
-    private val registeredTasks = mutableMapOf<String, TaskFactory>()
-    // map workflow name <> workflow factory
-    private val registeredWorkflows = mutableMapOf<String, WorkflowFactory>()
+    private val registeredTasks = mutableMapOf<String, () -> Task>()
 
-    override fun registerTask(name: String, factory: () -> Task) {
+    // map workflow name <> workflow factory
+    private val registeredWorkflows = mutableMapOf<String, () -> Workflow>()
+
+    fun registerTask(name: String, factory: () -> Task) {
         registeredTasks[name] = factory
     }
 
-    override fun registerWorkflow(name: String, factory: () -> Workflow) {
+    fun registerWorkflow(name: String, factory: () -> Workflow) {
         registeredWorkflows[name] = factory
     }
 
-    override fun unregisterTask(name: String) {
+    @TestOnly fun unregisterTask(name: String) {
         registeredTasks.remove(name)
     }
 
-    override fun unregisterWorkflow(name: String) {
+    @TestOnly fun unregisterWorkflow(name: String) {
         registeredWorkflows.remove(name)
     }
 
-    override fun getTaskInstance(name: String): Task =
-        registeredTasks[name]?.let { it() } ?: throw ClassNotFoundException(name)
+    fun getTaskFactory() = { taskName: TaskName -> getTaskInstance(taskName.toString()) }
 
-    override fun getWorkflowInstance(name: String): Workflow =
-        registeredWorkflows[name]?.let { it() } ?: throw ClassNotFoundException(name)
+    fun getWorkflowFactory() = { workflowName: WorkflowName -> getWorkflowInstance(workflowName.toString()) }
+
+    private fun getTaskInstance(name: String): Task =
+        registeredTasks[name]?.let { it() } ?: throw TaskNotFoundException(name)
+
+    private fun getWorkflowInstance(name: String): Workflow =
+        registeredWorkflows[name]?.let { it() } ?: throw WorkflowNotFoundException(name)
 }

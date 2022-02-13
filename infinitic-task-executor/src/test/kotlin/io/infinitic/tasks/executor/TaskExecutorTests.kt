@@ -45,13 +45,11 @@ import io.infinitic.common.tasks.engine.messages.TaskAttemptCompleted
 import io.infinitic.common.tasks.engine.messages.TaskAttemptFailed
 import io.infinitic.common.tasks.engine.messages.TaskEngineMessage
 import io.infinitic.common.tasks.executors.messages.ExecuteTaskAttempt
-import io.infinitic.exceptions.tasks.ClassNotFoundException
 import io.infinitic.exceptions.tasks.MaxRunDurationException
 import io.infinitic.exceptions.tasks.NoMethodFoundWithParameterCountException
 import io.infinitic.exceptions.tasks.NoMethodFoundWithParameterTypesException
 import io.infinitic.exceptions.tasks.TooManyMethodsFoundWithParameterCountException
 import io.infinitic.tasks.TaskOptions
-import io.infinitic.tasks.executor.register.TaskExecutorRegisterImpl
 import io.infinitic.tasks.executor.samples.SampleTaskWithBuggyRetry
 import io.infinitic.tasks.executor.samples.SampleTaskWithContext
 import io.infinitic.tasks.executor.samples.SampleTaskWithRetry
@@ -78,10 +76,19 @@ fun mockSendToTaskEngine(slots: MutableList<TaskEngineMessage>): SendToTaskEngin
 
 class TaskExecutorTests : StringSpec({
     val slots = mutableListOf<TaskEngineMessage>()
-    val taskExecutorRegister = TaskExecutorRegisterImpl()
     val mockClientFactory = mockk<()-> InfiniticClient>()
+    val taskFactory = { taskName: TaskName ->
+        when (taskName.toString()) {
+            "testingSampleTask" -> TestingSampleTask()
+            "sampleTaskWithRetry" -> SampleTaskWithRetry()
+            "sampleTaskWithBuggyRetry" -> SampleTaskWithBuggyRetry()
+            "sampleTaskWithContext" -> SampleTaskWithContext()
+            "sampleTaskWithTimeout" -> SampleTaskWithTimeout()
+            else -> throw ClassNotFoundException(taskName.toString())
+        }
+    }
     val taskExecutor =
-        TaskExecutor(clientName, taskExecutorRegister, mockSendToTaskEngine(slots), mockClientFactory)
+        TaskExecutor(clientName, mockSendToTaskEngine(slots), taskFactory, mockClientFactory)
 
     // ensure slots are emptied between each test
     beforeTest {
@@ -92,9 +99,8 @@ class TaskExecutorTests : StringSpec({
         val input = arrayOf(3, "3")
         val types = listOf(Int::class.java.name, String::class.java.name)
         // with
-        val msg = getExecuteTaskAttempt("foo", "other", input, types)
+        val msg = getExecuteTaskAttempt("testingSampleTask", "other", input, types)
         // when
-        taskExecutor.registerTask("foo") { TestingSampleTask() }
         coroutineScope { taskExecutor.handle(msg) }
         // then
         slots.size shouldBe 1
@@ -113,9 +119,8 @@ class TaskExecutorTests : StringSpec({
     "Should be able to run an explicit method with 2 parameters without parameterTypes" {
         val input = arrayOf(4, "3")
         // with
-        val msg = getExecuteTaskAttempt("foo", "other", input, null)
+        val msg = getExecuteTaskAttempt("testingSampleTask", "other", input, null)
         // when
-        taskExecutor.registerTask("foo") { TestingSampleTask() }
         coroutineScope { taskExecutor.handle(msg) }
         // then
         slots.size shouldBe 1
@@ -135,9 +140,8 @@ class TaskExecutorTests : StringSpec({
         val input = arrayOf(2, "3")
         val types = listOf(Int::class.java.name, String::class.java.name)
         // with
-        val msg = getExecuteTaskAttempt("foo", "unknown", input, types)
+        val msg = getExecuteTaskAttempt("unknown", "unknown", input, types)
         // when
-        taskExecutor.unregisterTask("foo")
         coroutineScope { taskExecutor.handle(msg) }
         // then
         slots.size shouldBe 1
@@ -155,9 +159,8 @@ class TaskExecutorTests : StringSpec({
         val input = arrayOf(2, "3")
         val types = listOf(Int::class.java.name, String::class.java.name)
         // with
-        val msg = getExecuteTaskAttempt("foo", "unknown", input, types)
+        val msg = getExecuteTaskAttempt("testingSampleTask", "unknown", input, types)
         // when
-        taskExecutor.registerTask("foo") { TestingSampleTask() }
         coroutineScope { taskExecutor.handle(msg) }
         // then
         slots.size shouldBe 1
@@ -174,9 +177,8 @@ class TaskExecutorTests : StringSpec({
     "Should throw NoMethodFoundWithParameterCount when trying to process an unknown method without parameterTypes" {
         val input = arrayOf(2, "3")
         // with
-        val msg = getExecuteTaskAttempt("foo", "unknown", input, null)
+        val msg = getExecuteTaskAttempt("testingSampleTask", "unknown", input, null)
         // when
-        taskExecutor.registerTask("foo") { TestingSampleTask() }
         coroutineScope { taskExecutor.handle(msg) }
         // then
         slots.size shouldBe 1
@@ -193,9 +195,8 @@ class TaskExecutorTests : StringSpec({
     "Should throw TooManyMethodsFoundWithParameterCount when trying to process an unknown method without parameterTypes" {
         val input = arrayOf(2, "3")
         // with
-        val msg = getExecuteTaskAttempt("foo", "handle", input, null)
+        val msg = getExecuteTaskAttempt("testingSampleTask", "handle", input, null)
         // when
-        taskExecutor.registerTask("foo") { TestingSampleTask() }
         coroutineScope { taskExecutor.handle(msg) }
         // then
         slots.size shouldBe 1
@@ -212,9 +213,8 @@ class TaskExecutorTests : StringSpec({
     "Should retry with correct exception" {
         val input = arrayOf(2, "3")
         // with
-        val msg = getExecuteTaskAttempt("foo", "handle", input, null)
+        val msg = getExecuteTaskAttempt("sampleTaskWithRetry", "handle", input, null)
         // when
-        taskExecutor.registerTask("foo") { SampleTaskWithRetry() }
         coroutineScope { taskExecutor.handle(msg) }
         // then
         slots.size shouldBe 1
@@ -231,9 +231,8 @@ class TaskExecutorTests : StringSpec({
     "Should throw when getRetryDelay throw an exception" {
         val input = arrayOf(2, "3")
         // with
-        val msg = getExecuteTaskAttempt("foo", "handle", input, null)
+        val msg = getExecuteTaskAttempt("sampleTaskWithBuggyRetry", "handle", input, null)
         // when
-        taskExecutor.registerTask("foo") { SampleTaskWithBuggyRetry() }
         coroutineScope { taskExecutor.handle(msg) }
         // then
         slots.size shouldBe 1
@@ -250,9 +249,8 @@ class TaskExecutorTests : StringSpec({
     "Should be able to access context from task" {
         val input = arrayOf(2, "3")
         // with
-        val msg = getExecuteTaskAttempt("foo", "handle", input, null)
+        val msg = getExecuteTaskAttempt("sampleTaskWithContext", "handle", input, null)
         // when
-        taskExecutor.registerTask("foo") { SampleTaskWithContext() }
         coroutineScope { taskExecutor.handle(msg) }
         // then
         slots.size shouldBe 1
@@ -272,9 +270,8 @@ class TaskExecutorTests : StringSpec({
         val input = arrayOf(2, "3")
         val types = listOf(Int::class.java.name, String::class.java.name)
         // with
-        val msg = getExecuteTaskAttempt("foo", "handle", input, types)
+        val msg = getExecuteTaskAttempt("sampleTaskWithTimeout", "handle", input, types)
         // when
-        taskExecutor.registerTask("foo") { SampleTaskWithTimeout() }
         coroutineScope { taskExecutor.handle(msg) }
         // then
         slots.size shouldBe 1

@@ -29,7 +29,6 @@ import io.infinitic.client.InfiniticClient
 import io.infinitic.common.errors.WorkerError
 
 interface TaskContext {
-    val register: TaskExecutorRegister
     val client: InfiniticClient
     val id: String
     val name: String

@@ -32,11 +32,11 @@ sealed class TaskUserException(
     help: String
 ) : UserException("$msg.\n$help")
 
-class ClassNotFoundException(
+class TaskNotFoundException(
     name: String
 ) : TaskUserException(
-    msg = "No implementation class provided for $name",
-    help = "Use \"register\" method to provide an instance that will be used associated to $name"
+    msg = "No implementation class provided for task $name",
+    help = ""
 )
 
 class NoMethodFoundWithParameterTypesException(

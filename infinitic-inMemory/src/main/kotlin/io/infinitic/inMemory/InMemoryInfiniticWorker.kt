@@ -63,10 +63,10 @@ class InMemoryInfiniticWorker(
 
     lateinit var output: InMemoryOutput
     lateinit var client: InMemoryInfiniticClient
-    override lateinit var name: String
+    override lateinit var workerName: String
 
     override fun startAsync(): CompletableFuture<Unit> =
-        if (this::output.isInitialized && this::client.isInitialized && this::name.isInitialized) {
+        if (this::output.isInitialized && this::client.isInitialized && this::workerName.isInitialized) {
             super.startAsync()
         } else {
             logger.warn { "Should not start ${InMemoryInfiniticWorker::class.java.name} outside of an in-memory client - Closing" }
@@ -84,10 +84,10 @@ class InMemoryInfiniticWorker(
                         runningScope.launch {
                             startTaskExecutor(
                                 "task-executor-$it: $name",
-                                taskExecutorRegister,
                                 inputChannel = channel,
                                 outputChannel = output.logChannel,
-                                output.sendEventsToTaskEngine(name)
+                                output.sendEventsToTaskEngine(name),
+                                register.getTaskFactory()
                             ) { client }
                         }
                     }
@@ -101,10 +101,10 @@ class InMemoryInfiniticWorker(
                         runningScope.launch {
                             startTaskExecutor(
                                 "workflow-task-executor-$it: $name",
-                                taskExecutorRegister,
                                 inputChannel = channel,
                                 outputChannel = output.logChannel,
-                                output.sendEventsToTaskEngine(name)
+                                output.sendEventsToTaskEngine(name),
+                                register.getTaskFactory()
                             ) { client }
                         }
                     }
@@ -119,7 +119,7 @@ class InMemoryInfiniticWorker(
 
         runningScope.launch {
             startTaskTagEngine(
-                "task-tag-engine: $name",
+                "task-tag-engine: $workerName",
                 storage,
                 inputChannel = channel,
                 outputChannel = output.logChannel,
@@ -159,7 +159,7 @@ class InMemoryInfiniticWorker(
 
         runningScope.launch {
             startWorkflowTagEngine(
-                "workflow-tag-engine: $name",
+                "workflow-tag-engine: $workerName",
                 storage,
                 inputChannel = channel,
                 outputChannel = output.logChannel,
@@ -175,7 +175,7 @@ class InMemoryInfiniticWorker(
 
         runningScope.launch {
             startWorkflowEngine(
-                "workflow-engine: $name",
+                "workflow-engine: $workerName",
                 storage,
                 inputChannel = channel,
                 outputChannel = output.logChannel,

@@ -33,6 +33,13 @@ sealed class WorkflowUserException(
     help: String
 ) : UserException("$msg.\n$help")
 
+class WorkflowNotFoundException(
+    name: String
+) : WorkflowUserException(
+    msg = "No implementation class provided for workflow $name",
+    help = ""
+)
+
 object InvalidInlineException : WorkflowUserException(
     msg = "Task or workflow must not be used inside an inline function",
     help = ""

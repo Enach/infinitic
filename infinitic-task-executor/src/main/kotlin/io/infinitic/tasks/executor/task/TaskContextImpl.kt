@@ -29,10 +29,8 @@ import io.infinitic.client.InfiniticClient
 import io.infinitic.common.errors.WorkerError
 import io.infinitic.tasks.TaskContext
 import io.infinitic.tasks.TaskOptions
-import io.infinitic.tasks.executor.TaskExecutor
 
 data class TaskContextImpl(
-    override val register: TaskExecutor,
     override val id: String,
     override val name: String,
     override val workflowId: String?,

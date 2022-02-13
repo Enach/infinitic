@@ -37,7 +37,7 @@ import io.infinitic.pulsar.topics.WorkflowTaskTopic
 import io.infinitic.pulsar.transport.PulsarConsumerFactory
 import io.infinitic.pulsar.transport.PulsarMessageToProcess
 import io.infinitic.pulsar.transport.PulsarOutput
-import io.infinitic.tasks.TaskExecutorRegister
+import io.infinitic.tasks.Task
 import io.infinitic.tasks.executor.worker.startTaskExecutor
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
@@ -50,9 +50,9 @@ fun CoroutineScope.startPulsarTaskExecutors(
     name: Name,
     concurrency: Int,
     consumerName: String,
-    taskExecutorRegister: TaskExecutorRegister,
     consumerFactory: PulsarConsumerFactory,
     output: PulsarOutput,
+    taskFactory: (TaskName) -> Task,
     clientFactory: () -> PulsarInfiniticClient
 ) {
 
@@ -63,10 +63,10 @@ fun CoroutineScope.startPulsarTaskExecutors(
     repeat(concurrency) {
         startTaskExecutor(
             "pulsar-task-executor:$it",
-            taskExecutorRegister,
             inputChannel,
             outputChannel,
             output.sendToTaskEngine(name),
+            taskFactory,
             clientFactory
         )
     }

@@ -33,22 +33,24 @@ import io.infinitic.common.workflows.data.properties.PropertyName
 import io.infinitic.common.workflows.data.workflowTasks.WorkflowTask
 import io.infinitic.common.workflows.data.workflowTasks.WorkflowTaskParameters
 import io.infinitic.common.workflows.data.workflowTasks.WorkflowTaskReturnValue
+import io.infinitic.common.workflows.data.workflows.WorkflowName
 import io.infinitic.exceptions.DeferredException
 import io.infinitic.exceptions.FailedWorkflowTaskException
 import io.infinitic.exceptions.WorkerException
 import io.infinitic.tasks.Task
 import io.infinitic.workflows.Deferred
+import io.infinitic.workflows.Workflow
 import io.infinitic.workflows.setChannelNames
 import java.lang.reflect.InvocationTargetException
 import java.time.Duration
 
-class WorkflowTaskImpl : Task(), WorkflowTask {
+class WorkflowTaskImpl(private val workflowFactory: (WorkflowName) -> Workflow) : Task(), WorkflowTask {
 
     override fun getDurationBeforeRetry(e: Exception): Duration? = null
 
     override fun handle(workflowTaskParameters: WorkflowTaskParameters): WorkflowTaskReturnValue {
         // get  instance workflow by name
-        val workflow = context.register.getWorkflowInstance("${workflowTaskParameters.workflowName}")
+        val workflow = workflowFactory(workflowTaskParameters.workflowName)
 
         // get method
         val methodRun = workflowTaskParameters.methodRun
