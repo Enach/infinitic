@@ -25,26 +25,7 @@
 
 package io.infinitic.tests
 
-import io.infinitic.common.fixtures.later
-import io.infinitic.common.tasks.data.TaskMeta
-import io.infinitic.exceptions.CanceledTaskException
-import io.infinitic.exceptions.FailedTaskException
-import io.infinitic.exceptions.tasks.MaxRunDurationException
-import io.infinitic.factory.InfiniticClientFactory
-import io.infinitic.factory.InfiniticWorkerFactory
-import io.infinitic.tasks.TaskOptions
-import io.infinitic.tests.tasks.ExpectedException
-import io.infinitic.tests.tasks.Status
-import io.infinitic.tests.tasks.TaskA
-import io.infinitic.tests.tasks.TaskTest
-import io.infinitic.tests.tasks.TaskTestImpl
-import io.kotest.assertions.throwables.shouldThrow
-import io.kotest.core.spec.style.StringSpec
-import io.kotest.matchers.shouldBe
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import java.time.Duration
-
+/*
 internal class TaskTests : StringSpec({
 
     // each test should not be longer than 5s
@@ -280,3 +261,4 @@ internal class TaskTests : StringSpec({
         taskWithMeta.meta() shouldBe TaskMeta(mapOf("foo" to "bar".toByteArray()))
     }
 })
+*/

@@ -77,8 +77,8 @@ private val clientNameTest = ClientName("clientTest")
 
 class ClientWorkflow : InfiniticClient() {
     override val clientName = clientNameTest
-    override val sendToTaskTagEngine = mockSendToTaskTagEngine(this, taskTagSlots, clientName, sendingScope)
-    override val sendToTaskEngine = mockSendToTaskEngine(this, taskSlot, clientName, sendingScope)
+//    override val sendToTaskTagEngine = mockSendToTaskTagEngine(this, taskTagSlots, clientName, sendingScope)
+//    override val sendToTaskExecutors = mockSendToTaskEngine(this, taskSlot, clientName, sendingScope)
     override val sendToWorkflowTagEngine = mockSendToWorkflowTagEngine(this, workflowTagSlots, clientName, sendingScope)
     override val sendToWorkflowEngine = mockSendToWorkflowEngine(this, workflowSlot, clientName, sendingScope)
 }

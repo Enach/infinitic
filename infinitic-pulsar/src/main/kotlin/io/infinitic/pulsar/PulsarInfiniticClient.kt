@@ -65,13 +65,15 @@ class PulsarInfiniticClient @JvmOverloads constructor(
         PulsarOutput.from(pulsarClient, pulsarTenant, pulsarNamespace, producerName)
     }
 
+/*
     override val sendToTaskTagEngine by lazy {
         pulsarOutput.sendToTaskTagEngine()
     }
 
-    override val sendToTaskEngine by lazy {
+    override val sendToTaskExecutors by lazy {
         pulsarOutput.sendToTaskEngine()
     }
+*/
 
     override val sendToWorkflowTagEngine by lazy {
         pulsarOutput.sendToWorkflowTagEngine()

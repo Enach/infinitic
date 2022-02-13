@@ -29,21 +29,14 @@ import io.infinitic.client.Deferred
 import io.infinitic.client.deferred.DeferredChannel
 import io.infinitic.client.deferred.DeferredMethod
 import io.infinitic.client.deferred.DeferredSend
-import io.infinitic.client.deferred.DeferredTask
 import io.infinitic.client.deferred.DeferredWorkflow
 import io.infinitic.common.clients.messages.ClientMessage
 import io.infinitic.common.clients.messages.MethodCanceled
 import io.infinitic.common.clients.messages.MethodCompleted
 import io.infinitic.common.clients.messages.MethodFailed
 import io.infinitic.common.clients.messages.MethodRunUnknown
-import io.infinitic.common.clients.messages.TaskCanceled
-import io.infinitic.common.clients.messages.TaskCompleted
-import io.infinitic.common.clients.messages.TaskFailed
-import io.infinitic.common.clients.messages.TaskIdsByTag
-import io.infinitic.common.clients.messages.TaskUnknown
 import io.infinitic.common.clients.messages.WorkflowIdsByTag
 import io.infinitic.common.clients.messages.interfaces.MethodMessage
-import io.infinitic.common.clients.messages.interfaces.TaskMessage
 import io.infinitic.common.data.ClientName
 import io.infinitic.common.data.methods.MethodName
 import io.infinitic.common.errors.FailedWorkflowError
@@ -54,19 +47,6 @@ import io.infinitic.common.proxies.GetWorkflowProxyHandler
 import io.infinitic.common.proxies.NewTaskProxyHandler
 import io.infinitic.common.proxies.NewWorkflowProxyHandler
 import io.infinitic.common.proxies.ProxyHandler
-import io.infinitic.common.tasks.data.TaskId
-import io.infinitic.common.tasks.data.TaskName
-import io.infinitic.common.tasks.data.TaskTag
-import io.infinitic.common.tasks.engine.SendToTaskEngine
-import io.infinitic.common.tasks.engine.messages.CancelTask
-import io.infinitic.common.tasks.engine.messages.DispatchTask
-import io.infinitic.common.tasks.engine.messages.RetryTask
-import io.infinitic.common.tasks.engine.messages.WaitTask
-import io.infinitic.common.tasks.tags.SendToTaskTagEngine
-import io.infinitic.common.tasks.tags.messages.AddTagToTask
-import io.infinitic.common.tasks.tags.messages.CancelTaskByTag
-import io.infinitic.common.tasks.tags.messages.GetTaskIdsByTag
-import io.infinitic.common.tasks.tags.messages.RetryTaskByTag
 import io.infinitic.common.workflows.data.channels.ChannelSignalId
 import io.infinitic.common.workflows.data.methodRuns.MethodRunId
 import io.infinitic.common.workflows.data.workflows.WorkflowCancellationReason
@@ -87,13 +67,9 @@ import io.infinitic.common.workflows.tags.messages.DispatchMethodByTag
 import io.infinitic.common.workflows.tags.messages.GetWorkflowIdsByTag
 import io.infinitic.common.workflows.tags.messages.RetryWorkflowTaskByTag
 import io.infinitic.common.workflows.tags.messages.SendSignalByTag
-import io.infinitic.exceptions.CanceledTaskException
 import io.infinitic.exceptions.CanceledWorkflowException
-import io.infinitic.exceptions.FailedTaskException
 import io.infinitic.exceptions.FailedWorkflowException
-import io.infinitic.exceptions.UnknownTaskException
 import io.infinitic.exceptions.UnknownWorkflowException
-import io.infinitic.exceptions.WorkerException
 import io.infinitic.exceptions.clients.InvalidChannelUsageException
 import io.infinitic.exceptions.clients.InvalidRunningTaskException
 import io.infinitic.workflows.SendChannel
@@ -109,9 +85,9 @@ import java.util.concurrent.CompletableFuture
 internal class ClientDispatcherImpl(
     val scope: CoroutineScope,
     val clientName: ClientName,
-    val sendToTaskEngine: SendToTaskEngine,
+//    val sendToTaskExecutors: SendToTaskExecutors,
     val sendToWorkflowEngine: SendToWorkflowEngine,
-    val sendToTaskTagEngine: SendToTaskTagEngine,
+//    val sendToTaskTagEngine: SendToTaskTagEngine,
     val sendToWorkflowTagEngine: SendToWorkflowTagEngine
 ) : ClientDispatcher {
     val logger = KotlinLogging.logger {}
@@ -133,7 +109,7 @@ internal class ClientDispatcherImpl(
     override fun <R : Any?> dispatchAsync(
         handler: ProxyHandler<*>
     ): CompletableFuture<Deferred<R>> = when (handler) {
-        is NewTaskProxyHandler -> dispatchTaskAsync(handler)
+        is NewTaskProxyHandler -> TODO() // dispatchTaskAsync(handler)
         is NewWorkflowProxyHandler -> dispatchWorkflowAsync(handler)
         is GetTaskProxyHandler -> throw InvalidRunningTaskException("${handler.stub()}")
         is GetWorkflowProxyHandler -> dispatchMethodAsync(handler)
@@ -141,13 +117,14 @@ internal class ClientDispatcherImpl(
     }
 
     override fun <R : Any?> dispatchAndWait(handler: ProxyHandler<*>): R = when (handler) {
-        is NewTaskProxyHandler -> dispatchTaskAndWait(handler)
+        is NewTaskProxyHandler -> TODO() // dispatchTaskAndWait(handler)
         is NewWorkflowProxyHandler -> dispatchWorkflowAndWait(handler)
         is GetTaskProxyHandler -> throw InvalidRunningTaskException("${handler.stub()}")
         is GetWorkflowProxyHandler -> dispatchMethodAndWait(handler)
         is ChannelProxyHandler -> dispatchSignalAndWait(handler)
     }
 
+/*
     override fun <T> awaitTask(
         returnClass: Class<T>,
         taskName: TaskName,
@@ -162,7 +139,7 @@ internal class ClientDispatcherImpl(
                 taskId = taskId,
                 emitterName = clientName
             )
-            scope.launch { sendToTaskEngine(waitTask) }
+            scope.launch { sendToTaskExecutors(waitTask) }
         }
 
         // wait for result
@@ -194,6 +171,7 @@ internal class ClientDispatcherImpl(
             else -> thisShouldNotHappen("Unexpected ${taskResult::class}")
         }
     }
+*/
 
     override fun <T> awaitWorkflow(
         returnClass: Class<T>,
@@ -262,12 +240,14 @@ internal class ClientDispatcherImpl(
         }
     }
 
+/*
     override fun completeTaskAsync(
         taskName: TaskName,
         taskId: TaskId?,
         taskTag: TaskTag?,
         value: Any?
     ): CompletableFuture<Unit> = TODO("Not yet implemented")
+*/
 
     override fun completeWorkflowAsync(
         workflowName: WorkflowName,
@@ -276,6 +256,7 @@ internal class ClientDispatcherImpl(
         value: Any?
     ): CompletableFuture<Unit> = TODO("Not yet implemented")
 
+/*
     override fun cancelTaskAsync(
         taskName: TaskName,
         taskId: TaskId?,
@@ -288,7 +269,7 @@ internal class ClientDispatcherImpl(
                     taskId = taskId,
                     emitterName = clientName
                 )
-                sendToTaskEngine(msg)
+                sendToTaskExecutors(msg)
             }
             taskTag != null -> {
                 val msg = CancelTaskByTag(
@@ -301,6 +282,7 @@ internal class ClientDispatcherImpl(
             else -> thisShouldNotHappen()
         }
     }
+*/
 
     override fun cancelWorkflowAsync(
         workflowName: WorkflowName,
@@ -333,6 +315,7 @@ internal class ClientDispatcherImpl(
         }
     }
 
+/*
     override fun retryTaskAsync(
         taskName: TaskName,
         taskId: TaskId?,
@@ -345,7 +328,7 @@ internal class ClientDispatcherImpl(
                     taskId = taskId,
                     emitterName = clientName
                 )
-                sendToTaskEngine(msg)
+                sendToTaskExecutors(msg)
             }
             taskTag != null -> {
                 val msg = RetryTaskByTag(
@@ -358,6 +341,7 @@ internal class ClientDispatcherImpl(
             else -> thisShouldNotHappen()
         }
     }
+*/
 
     override fun retryWorkflowAsync(
         workflowName: WorkflowName,
@@ -386,6 +370,7 @@ internal class ClientDispatcherImpl(
         }
     }
 
+/*
     // synchronously get task ids per tag
     override fun getTaskIdsByTag(
         taskName: TaskName,
@@ -413,6 +398,7 @@ internal class ClientDispatcherImpl(
         else ->
             thisShouldNotHappen()
     }
+*/
 
     override fun getWorkflowIdsByTag(
         workflowName: WorkflowName,
@@ -442,6 +428,7 @@ internal class ClientDispatcherImpl(
             thisShouldNotHappen()
     }
 
+/*
     // asynchronous call: dispatch(stub::method)(*args)
     @Suppress("UNCHECKED_CAST")
     private fun <R : Any?> dispatchTaskAsync(
@@ -522,10 +509,11 @@ internal class ClientDispatcherImpl(
                     taskMeta = handler.taskMeta,
                     emitterName = clientName
                 )
-                launch { sendToTaskEngine(dispatchTask) }
+                launch { sendToTaskExecutors(dispatchTask) }
             }
         }.join()
     }
+*/
 
     // asynchronous call: dispatch(stub::method)(*args)
     @Suppress("UNCHECKED_CAST")

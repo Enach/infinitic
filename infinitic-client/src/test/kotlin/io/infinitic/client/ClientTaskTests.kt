@@ -25,29 +25,11 @@
 
 package io.infinitic.client
 
-import io.infinitic.client.deferred.DeferredTask
-import io.infinitic.client.samples.FakeClass
-import io.infinitic.client.samples.FakeInterface
-import io.infinitic.client.samples.FakeTask
-import io.infinitic.client.samples.FooTask
 import io.infinitic.common.data.ClientName
-import io.infinitic.common.data.methods.MethodName
-import io.infinitic.common.data.methods.MethodParameterTypes
-import io.infinitic.common.data.methods.MethodParameters
-import io.infinitic.common.fixtures.TestFactory
-import io.infinitic.common.tasks.data.TaskId
-import io.infinitic.common.tasks.data.TaskMeta
-import io.infinitic.common.tasks.data.TaskName
-import io.infinitic.common.tasks.data.TaskTag
-import io.infinitic.common.tasks.engine.messages.DispatchTask
 import io.infinitic.common.tasks.engine.messages.TaskEngineMessage
-import io.infinitic.common.tasks.tags.messages.AddTagToTask
 import io.infinitic.common.tasks.tags.messages.TaskTagEngineMessage
 import io.infinitic.common.workflows.engine.messages.WorkflowEngineMessage
 import io.infinitic.common.workflows.tags.messages.WorkflowTagEngineMessage
-import io.infinitic.tasks.TaskOptions
-import io.kotest.core.spec.style.StringSpec
-import io.kotest.matchers.shouldBe
 import io.mockk.slot
 import java.util.concurrent.CopyOnWriteArrayList
 
@@ -59,12 +41,13 @@ private val clientNameTest = ClientName("clientTest")
 
 class ClientTask : InfiniticClient() {
     override val clientName = clientNameTest
-    override val sendToTaskTagEngine = mockSendToTaskTagEngine(this, taskTagSlots, clientName, sendingScope)
-    override val sendToTaskEngine = mockSendToTaskEngine(this, taskSlot, clientName, sendingScope)
+//    override val sendToTaskTagEngine = mockSendToTaskTagEngine(this, taskTagSlots, clientName, sendingScope)
+//    override val sendToTaskExecutors = mockSendToTaskEngine(this, taskSlot, clientName, sendingScope)
     override val sendToWorkflowTagEngine = mockSendToWorkflowTagEngine(this, workflowTagSlots, clientName, sendingScope)
     override val sendToWorkflowEngine = mockSendToWorkflowEngine(this, workflowSlot, clientName, sendingScope)
 }
 
+/*
 class ClientTaskTests : StringSpec({
     val client = ClientTask()
 
@@ -623,3 +606,4 @@ class ClientTaskTests : StringSpec({
 //        taskSlot.isCaptured shouldBe false
 //    }
 })
+*/

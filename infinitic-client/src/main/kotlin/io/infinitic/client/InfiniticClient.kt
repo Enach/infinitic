@@ -32,14 +32,8 @@ import io.infinitic.common.data.ClientName
 import io.infinitic.common.exceptions.thisShouldNotHappen
 import io.infinitic.common.proxies.GetTaskProxyHandler
 import io.infinitic.common.proxies.GetWorkflowProxyHandler
-import io.infinitic.common.proxies.NewTaskProxyHandler
 import io.infinitic.common.proxies.NewWorkflowProxyHandler
 import io.infinitic.common.proxies.ProxyHandler
-import io.infinitic.common.tasks.data.TaskId
-import io.infinitic.common.tasks.data.TaskMeta
-import io.infinitic.common.tasks.data.TaskTag
-import io.infinitic.common.tasks.engine.SendToTaskEngine
-import io.infinitic.common.tasks.tags.SendToTaskTagEngine
 import io.infinitic.common.workflows.data.methodRuns.MethodRunId
 import io.infinitic.common.workflows.data.workflows.WorkflowId
 import io.infinitic.common.workflows.data.workflows.WorkflowMeta
@@ -47,7 +41,6 @@ import io.infinitic.common.workflows.data.workflows.WorkflowTag
 import io.infinitic.common.workflows.engine.SendToWorkflowEngine
 import io.infinitic.common.workflows.tags.SendToWorkflowTagEngine
 import io.infinitic.exceptions.clients.InvalidStubException
-import io.infinitic.tasks.TaskOptions
 import io.infinitic.workflows.Consumer0
 import io.infinitic.workflows.Consumer1
 import io.infinitic.workflows.Consumer2
@@ -80,8 +73,8 @@ abstract class InfiniticClient : Closeable {
     val name by lazy { clientName.toString() }
 
     protected abstract val clientName: ClientName
-    protected abstract val sendToTaskTagEngine: SendToTaskTagEngine
-    protected abstract val sendToTaskEngine: SendToTaskEngine
+//    protected abstract val sendToTaskTagEngine: SendToTaskTagEngine
+//    protected abstract val sendToTaskExecutors: SendToTaskExecutors
     protected abstract val sendToWorkflowTagEngine: SendToWorkflowTagEngine
     protected abstract val sendToWorkflowEngine: SendToWorkflowEngine
     protected val logger = KotlinLogging.logger {}
@@ -96,9 +89,9 @@ abstract class InfiniticClient : Closeable {
         ClientDispatcherImpl(
             sendingScope,
             clientName,
-            sendToTaskEngine,
+//            sendToTaskExecutors,
             sendToWorkflowEngine,
-            sendToTaskTagEngine,
+//            sendToTaskTagEngine,
             sendToWorkflowTagEngine
         )
     }
@@ -139,6 +132,7 @@ abstract class InfiniticClient : Closeable {
     /**
      *  Create a stub for a new task
      */
+/*
     @JvmOverloads
     fun <T : Any> newTask(
         klass: Class<out T>,
@@ -151,6 +145,7 @@ abstract class InfiniticClient : Closeable {
         taskOptions = options ?: TaskOptions(),
         taskMeta = TaskMeta(meta ?: mapOf())
     ) { dispatcher }.stub()
+*/
 
     /**
      *  Create a stub for a new workflow
@@ -171,6 +166,7 @@ abstract class InfiniticClient : Closeable {
     /**
      *  Create a stub for an existing task targeted by id
      */
+/*
     fun <T : Any> getTaskById(
         klass: Class<out T>,
         id: String
@@ -179,10 +175,12 @@ abstract class InfiniticClient : Closeable {
         TaskId(id),
         null
     ) { dispatcher }.stub()
+*/
 
     /**
      *  Create a stub for existing task targeted by tag
      */
+/*
     fun <T : Any> getTaskByTag(
         klass: Class<out T>,
         tag: String
@@ -191,6 +189,7 @@ abstract class InfiniticClient : Closeable {
         null,
         TaskTag(tag)
     ) { dispatcher }.stub()
+*/
 
     /**
      *  Create a stub for an existing workflow targeted by id
@@ -685,13 +684,14 @@ abstract class InfiniticClient : Closeable {
     ): Any? = when (val handler = getProxyHandler(stub)) {
         is GetTaskProxyHandler -> when {
             handler.taskId != null ->
-                dispatcher.awaitTask(
-                    handler.returnType,
-                    handler.taskName,
-                    handler.methodName,
-                    handler.taskId!!,
-                    false
-                )
+                TODO()
+//                dispatcher.awaitTask(
+//                    handler.returnType,
+//                    handler.taskName,
+//                    handler.methodName,
+//                    handler.taskId!!,
+//                    false
+//                )
             handler.taskTag != null ->
                 TODO("Not yet implemented")
             else ->
@@ -749,7 +749,8 @@ abstract class InfiniticClient : Closeable {
         stub: T
     ): CompletableFuture<Unit> = when (val handler = getProxyHandler(stub)) {
         is GetTaskProxyHandler ->
-            dispatcher.cancelTaskAsync(handler.taskName, handler.taskId, handler.taskTag)
+            TODO()
+        // dispatcher.cancelTaskAsync(handler.taskName, handler.taskId, handler.taskTag)
         is GetWorkflowProxyHandler ->
             dispatcher.cancelWorkflowAsync(handler.workflowName, handler.workflowId, null, handler.workflowTag)
         else ->
@@ -773,7 +774,8 @@ abstract class InfiniticClient : Closeable {
         value: Any?
     ): CompletableFuture<Unit> = when (val handler = getProxyHandler(stub)) {
         is GetTaskProxyHandler ->
-            dispatcher.completeTaskAsync(handler.taskName, handler.taskId, handler.taskTag, value)
+            TODO()
+        // dispatcher.completeTaskAsync(handler.taskName, handler.taskId, handler.taskTag, value)
         is GetWorkflowProxyHandler ->
             dispatcher.completeWorkflowAsync(handler.workflowName, handler.workflowId, handler.workflowTag, value)
         else ->
@@ -797,7 +799,8 @@ abstract class InfiniticClient : Closeable {
         stub: T,
     ): CompletableFuture<Unit> = when (val handler = getProxyHandler(stub)) {
         is GetTaskProxyHandler ->
-            dispatcher.retryTaskAsync(handler.taskName, handler.taskId, handler.taskTag)
+            TODO()
+        // dispatcher.retryTaskAsync(handler.taskName, handler.taskId, handler.taskTag)
         is GetWorkflowProxyHandler ->
             dispatcher.retryWorkflowAsync(handler.workflowName, handler.workflowId, handler.workflowTag)
         else ->
@@ -820,7 +823,8 @@ abstract class InfiniticClient : Closeable {
         stub: T
     ): Set<String> = when (val handler = getProxyHandler(stub)) {
         is GetTaskProxyHandler ->
-            dispatcher.getTaskIdsByTag(handler.taskName, handler.taskId, handler.taskTag)
+            TODO()
+        // dispatcher.getTaskIdsByTag(handler.taskName, handler.taskId, handler.taskTag)
         is GetWorkflowProxyHandler ->
             dispatcher.getWorkflowIdsByTag(handler.workflowName, handler.workflowId, handler.workflowTag)
         else ->

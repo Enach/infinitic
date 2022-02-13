@@ -51,9 +51,11 @@ class InMemoryInfiniticClient(
 
     override val clientName: ClientName = ClientName(name ?: "inMemory")
 
+/*
     override val sendToTaskTagEngine = inMemoryOutput.sendCommandsToTaskTagEngine
 
-    override val sendToTaskEngine = inMemoryOutput.sendCommandsToTaskEngine()
+    override val sendToTaskExecutors = inMemoryOutput.sendCommandsToTaskEngine()
+*/
 
     override val sendToWorkflowTagEngine = inMemoryOutput.sendCommandsToWorkflowTagEngine
 

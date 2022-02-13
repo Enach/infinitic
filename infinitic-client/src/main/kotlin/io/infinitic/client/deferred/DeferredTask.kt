@@ -39,11 +39,11 @@ class DeferredTask<R> (
     private val dispatcher: ClientDispatcher,
 ) : Deferred<R> {
 
-    override fun cancelAsync() = dispatcher.cancelTaskAsync(taskName, taskId, null)
+    override fun cancelAsync() = TODO() // dispatcher.cancelTaskAsync(taskName, taskId, null)
 
-    override fun retryAsync() = dispatcher.retryTaskAsync(taskName, taskId, null)
+    override fun retryAsync() = TODO() // dispatcher.retryTaskAsync(taskName, taskId, null)
 
-    override fun await(): R = dispatcher.awaitTask(returnClass, taskName, methodName, taskId, true)
+    override fun await(): R = TODO() // dispatcher.awaitTask(returnClass, taskName, methodName, taskId, true)
 
     override val id: String by lazy { taskId.toString() }
 }
